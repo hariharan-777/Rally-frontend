@@ -1,0 +1,254 @@
+:root {
+  --text: #6b6375;
+  --text-h: #08060d;
+  --bg: #fff;
+  --border: #e5e4e7;
+  --code-bg: #f4f3ec;
+  --accent: #aa3bff;
+  --accent-bg: rgba(170, 59, 255, 0.1);
+  --accent-border: rgba(170, 59, 255, 0.5);
+  --social-bg: rgba(244, 243, 236, 0.5);
+  --shadow:
+    rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
+
+  --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
+  --heading: system-ui, 'Segoe UI', Roboto, sans-serif;
+  --mono: ui-monospace, Consolas, monospace;
+
+  font: 18px/145% var(--sans);
+  letter-spacing: 0.18px;
+  color-scheme: light dark;
+  color: var(--text);
+  background: var(--bg);
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+  @media (max-width: 1024px) {
+    font-size: 16px;
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --text: #9ca3af;
+    --text-h: #f3f4f6;
+    --bg: #16171d;
+    --border: #2e303a;
+    --code-bg: #1f2028;
+    --accent: #c084fc;
+    --accent-bg: rgba(192, 132, 252, 0.15);
+    --accent-border: rgba(192, 132, 252, 0.5);
+    --social-bg: rgba(47, 48, 58, 0.5);
+    --shadow:
+      rgba(0, 0, 0, 0.4) 0 10px 15px -3px, rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
+  }
+
+  #social .button-icon {
+    filter: invert(1) brightness(2);
+  }
+}
+
+#root {
+  min-height: 100svh;
+}
+
+body {
+  margin: 0;
+}
+
+h1,
+h2 {
+  font-family: var(--heading);
+  font-weight: 500;
+  color: var(--text-h);
+}
+
+h1 {
+  font-size: 56px;
+  letter-spacing: -1.68px;
+  margin: 32px 0;
+  @media (max-width: 1024px) {
+    font-size: 36px;
+    margin: 20px 0;
+  }
+}
+h2 {
+  font-size: 24px;
+  line-height: 118%;
+  letter-spacing: -0.24px;
+  margin: 0 0 8px;
+  @media (max-width: 1024px) {
+    font-size: 20px;
+  }
+}
+p {
+  margin: 0;
+}
+
+code,
+.counter {
+  font-family: var(--mono);
+  display: inline-flex;
+  border-radius: 4px;
+  color: var(--text-h);
+}
+
+code {
+  font-size: 15px;
+  line-height: 135%;
+  padding: 4px 8px;
+  background: var(--code-bg);
+}
+
+/* App shell: a column that fills the screen — the current screen on top, the nav bar below. */
+.app {
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+}
+
+.app__screen {
+  flex: 1; /* take all the height the nav bar doesn't use */
+  min-height: 0; /* let it shrink below its content's size, so the map never pushes the bar off-screen */
+  position: relative;
+}
+
+/* Bottom navigation bar: a floating pill above the bottom edge, not a full-width strip. */
+.bottom-nav {
+  /* Always a white pill, even in dark mode: override the theme colours just inside the bar.
+     Everything below that uses var(--bg), var(--text) etc. picks these up. */
+  --bg: #fff;
+  --text: #6b6375;
+  --accent: #0b6e4f; /* Rally green */
+  --border: #e5e4e7;
+
+  position: fixed; /* float over the map instead of taking space in the column */
+  left: 50%;
+  bottom: 16px;
+  transform: translateX(-50%); /* centre it: shift left by half its own width */
+  width: min(420px, calc(100% - 32px)); /* 420px max, but always 16px clear of each side */
+  display: flex;
+  padding: 4px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 999px; /* larger than half the height → both ends become semicircles */
+  box-shadow: var(--shadow);
+  transition: width 250ms ease; /* animate between full and compact sizes */
+}
+
+.bottom-nav__tab {
+  flex: 1; /* four equal-width tabs */
+  min-height: 48px; /* comfortable thumb-sized tap target */
+  padding: 8px 4px;
+  border: none;
+  border-radius: 999px; /* match the pill, so the focus ring is rounded too */
+  background: none;
+  font: inherit;
+  font-size: 13px;
+  color: var(--text);
+  cursor: pointer;
+  min-width: 0; /* allow a tab to shrink all the way to 0 when collapsed */
+  white-space: nowrap; /* keep labels on one line while the width animates */
+  overflow: hidden;
+  transition:
+    flex-grow 250ms ease,
+    padding 250ms ease,
+    opacity 200ms ease,
+    visibility 250ms;
+}
+
+.bottom-nav__tab.is-active {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+/* Thin vertical divider before every tab except the first. */
+.bottom-nav__tab {
+  position: relative; /* so the divider is positioned against its own tab */
+}
+
+.bottom-nav__tab + .bottom-nav__tab::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 25%;
+  height: 50%; /* a short line centred vertically, not edge to edge */
+  width: 1px;
+  background: var(--border);
+  transition: opacity 200ms ease;
+}
+
+/* In the compact pill only one tab shows, so hide the dividers. */
+.bottom-nav.is-compact .bottom-nav__tab::before {
+  opacity: 0;
+}
+
+/* Compact: a small pill that shows only the active tab. */
+.bottom-nav.is-compact {
+  width: 140px;
+}
+
+.bottom-nav.is-compact .bottom-nav__tab:not(.is-active) {
+  flex-grow: 0; /* give up its share of the width → collapses to 0 */
+  padding-inline: 0;
+  opacity: 0;
+  visibility: hidden; /* also removes it from keyboard focus and screen readers */
+}
+
+/* Respect "reduce motion": switch sizes instantly instead of animating. */
+@media (prefers-reduced-motion: reduce) {
+  .bottom-nav,
+  .bottom-nav__tab {
+    transition: none;
+  }
+}
+
+/* Visible focus ring for keyboard users only (not on mouse/touch). */
+.bottom-nav__tab:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+
+/* "You are here" marker: a blue dot with a white ring and a pulsing halo. */
+.user-location-dot {
+  position: relative;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #1a73e8;
+  border: 3px solid #fff;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.35);
+}
+
+/* The halo is a second circle behind the dot that grows and fades out, forever. */
+.user-location-dot::before {
+  content: '';
+  position: absolute;
+  inset: -3px; /* cover the dot including its 3px white border */
+  border-radius: 50%;
+  background: rgba(26, 115, 232, 0.4);
+  z-index: -1;
+  animation: user-location-pulse 2s ease-out infinite;
+}
+
+@keyframes user-location-pulse {
+  from {
+    transform: scale(1);
+    opacity: 1;
+  }
+  to {
+    transform: scale(3.5);
+    opacity: 0;
+  }
+}
+
+/* Respect the OS "reduce motion" setting: keep a static halo instead of pulsing. */
+@media (prefers-reduced-motion: reduce) {
+  .user-location-dot::before {
+    animation: none;
+    transform: scale(2);
+    opacity: 0.5;
+  }
+}
