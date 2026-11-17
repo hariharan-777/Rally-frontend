@@ -175,7 +175,9 @@ code {
 
   position: fixed; /* float over the map instead of taking space in the column */
   left: 50%;
-  bottom: clamp(10px, 3vw, 24px); /* closer to the edge on small screens, more breathing room on big ones */
+  /* Sits above the map's bottom row — the Ola logo (left) and the ⓘ attribution button (right),
+     which take ~34px from the bottom edge and must stay visible — plus a small responsive gap. */
+  bottom: calc(38px + clamp(2px, 1vw, 8px));
   transform: translateX(-50%); /* centre it: shift left by half its own width */
   width: min(78vw, 400px); /* 78% of the screen width, capped at 400px on desktops */
   display: flex;
