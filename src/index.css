@@ -84,8 +84,7 @@
 :root[data-theme='dark'] {
   --rally-green: #34d399; /* brighter green, so accents still pop on black */
   /* Black, with a faint sheen — and see-through like the light theme. */
-  --rally-surface: linear-gradient(150deg, rgba(28, 28, 28, 0.4) 0%, rgba(10, 10, 10, 0.4) 100%);
-  --rally-nav-surface: linear-gradient(150deg, rgba(28, 28, 28, 0.6) 0%, rgba(10, 10, 10, 0.6) 100%);  --rally-surface-flat: #000;
+  --rally-surface: linear-gradient(150deg, rgba(28, 28, 28, 0.4) 0%, rgba(10, 10, 10, 0.4) 100%);  --rally-nav-surface: linear-gradient(150deg, rgba(28, 28, 28, 0.6) 0%, rgba(10, 10, 10, 0.6) 100%);  --rally-surface-flat: #000;
   --rally-border: rgba(255, 255, 255, 0.1);
   --rally-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
   --rally-text: #a3a3a3; /* neutral grey, no green tint */
@@ -387,11 +386,14 @@ code {
 
   position: fixed;
   top: var(--gap);
-  right: var(--gap);
+  right: calc(var(--gap) + 24px); /* extra room on the right for the bubble tail */
   z-index: 20; /* above the map */
   /* Right half of the screen: 50% of the width minus the gaps — but never narrower than
      240px (a phone's half is too thin to read) and never wider than 420px on desktops. */
-  width: clamp(240px, calc(50vw - var(--gap) * 1.5), 420px);
+  /* Only as wide as its text (fit-content), so there's no empty space on the right —
+     but never wider than half the screen (max 420px); longer names wrap instead. */
+  width: fit-content;
+  max-width: clamp(240px, calc(50vw - var(--gap) * 1.5), 420px);
   /* Only as tall as its content — but never more than the top half of the screen. */
   max-height: calc(50dvh - var(--gap));
   /* An invisible wrapper: the green card on top, the slider floating below it. */
@@ -400,8 +402,8 @@ code {
   gap: 10px;
   color: var(--rally-text);
   font-family: 'Outfit', system-ui, sans-serif; /* everything inside uses Outfit */
-  /* Hidden: shifted right by its own width plus the gap, so it's completely off-screen. */
-  transform: translateX(calc(100% + var(--gap) * 2));
+  /* Hidden: shifted right by its own width, plus the gap and the tail, so it's completely off-screen. */
+  transform: translateX(calc(100% + var(--gap) * 2 + 52px));
   transition: transform 280ms cubic-bezier(0.2, 0.8, 0.2, 1); /* quick start, gentle stop */
 }
 
@@ -416,15 +418,37 @@ code {
 
 /* The green card with the venue details. */
 .venue-panel__card {
+  position: relative; /* so the tail (::after) is placed against the card's own corner */
   display: flex;
   min-height: 0; /* can shrink on a short screen, so the slider below stays visible */
-  overflow: hidden; /* keep the content inside the rounded corners */
+  /* no overflow: hidden — it would clip the tail sticking out of the corner */
   background: var(--rally-surface);
   backdrop-filter: var(--rally-blur);
   -webkit-backdrop-filter: var(--rally-blur);
   border: 1px solid var(--rally-border);
   border-radius: 16px; /* softly rounded rectangle (the slider below stays a pill) */
+  border-top-right-radius: 0; /* sharp corner where the tail joins, like a WhatsApp bubble */
   box-shadow: var(--rally-shadow);
+}
+
+/* The chat-bubble tail: a small curved point sticking out of the top-right corner.
+   clip-path cuts a plain box into the tail shape — a straight top edge, then a curve back
+   to the card's side (12×13 px). It uses the same colour and blur as the card so they read
+   as one shape. */
+.venue-panel__card::after {
+  content: '';
+  position: absolute;
+  top: -1px; /* line up with the card's top border */
+  right: -25px; /* stick out past the right edge */
+  width: 26px;
+  height: 18px;
+  background: var(--rally-surface);
+  backdrop-filter: var(--rally-blur);
+  -webkit-backdrop-filter: var(--rally-blur);
+  /* A long point sweeping away from the card: flat along the top out to the tip (26px), then a
+     curve that bows inwards (its control points sit above the straight line back), so the tail
+     is thick where it joins the card and tapers to a sharp tip — like a WhatsApp bubble. */
+  clip-path: path('M0 0 L26 0 C17 1 7 5 0 18 Z');
 }
 
 .venue-panel__body {
@@ -432,8 +456,9 @@ code {
   min-height: 0;
   overflow-y: auto; /* still scrolls on a very short screen… */
   scrollbar-width: none; /* …but with no visible scrollbar (Firefox, new Chrome) */
-  /* Extra room left and right: the rounded ends curve inwards, and text near them would get clipped. */
-  padding: 12px 26px;
+  /* Tight space between the card's edge and the text (the card is a rounded rectangle now,
+     so it no longer needs the extra side room the pill shape did). */
+  padding: 8px 12px;
 }
 
 .venue-panel__body::-webkit-scrollbar {
