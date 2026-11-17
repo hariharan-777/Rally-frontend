@@ -1,0 +1,87 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- Rally logo: a football falling through flames.
+       Used as the favicon (index.html) and the Venues tab icon (NavIcons.tsx). -->
+  <defs>
+    <!-- Flame colours: hot at the base, cooling and fading towards the tips. -->
+    <linearGradient id="flame-outer" x1="0" y1="1" x2="0" y2="0">
+      <stop offset="0" stop-color="#ff7a00" />
+      <stop offset="0.55" stop-color="#e63200" />
+      <stop offset="1" stop-color="#8b0a00" stop-opacity="0" />
+    </linearGradient>
+    <linearGradient id="flame-mid" x1="0" y1="1" x2="0" y2="0">
+      <stop offset="0" stop-color="#ffc400" />
+      <stop offset="0.6" stop-color="#ff7a00" />
+      <stop offset="1" stop-color="#ff5000" stop-opacity="0" />
+    </linearGradient>
+    <linearGradient id="flame-core" x1="0" y1="1" x2="0" y2="0">
+      <stop offset="0" stop-color="#fffbe6" />
+      <stop offset="0.5" stop-color="#ffe680" />
+      <stop offset="1" stop-color="#ffb300" stop-opacity="0.2" />
+    </linearGradient>
+    <radialGradient id="glow" cx="0.5" cy="0.6" r="0.5">
+      <stop offset="0" stop-color="#ff9a1f" stop-opacity="0.55" />
+      <stop offset="1" stop-color="#ff5a00" stop-opacity="0" />
+    </radialGradient>
+
+    <!-- Turbulence noise pushes the flame edges around so they look like real fire,
+         and animating its frequency makes them flicker. -->
+    <filter id="fire" x="-30%" y="-30%" width="160%" height="160%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.06 0.14" numOctaves="2" seed="3" result="noise">
+        <animate attributeName="baseFrequency" dur="1.2s" repeatCount="indefinite"
+          values="0.06 0.14; 0.07 0.11; 0.055 0.16; 0.06 0.14" />
+      </feTurbulence>
+      <feDisplacementMap in="SourceGraphic" in2="noise" scale="5" xChannelSelector="R" yChannelSelector="G" />
+    </filter>
+    <filter id="blur" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="3" />
+    </filter>
+
+    <!-- Ball shading: lit from the top-left, darker towards the bottom-right. -->
+    <radialGradient id="ball-shade" cx="0.38" cy="0.32" r="0.75">
+      <stop offset="0" stop-color="#ffffff" />
+      <stop offset="0.7" stop-color="#e6e6e6" />
+      <stop offset="1" stop-color="#a8a8a8" />
+    </radialGradient>
+    <!-- Warm light from the flames on the top of the ball. -->
+    <linearGradient id="fire-light" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ff8a00" stop-opacity="0.45" />
+      <stop offset="0.5" stop-color="#ff8a00" stop-opacity="0" />
+    </linearGradient>
+    <clipPath id="ball-clip">
+      <circle r="10" />
+    </clipPath>
+    <!-- One outer panel (pointing at the centre) + its seam; rotated 5 times below. -->
+    <g id="panel">
+      <path d="M0 -5.5 L-2.85 -7.57 L-1.76 -10.93 L1.76 -10.93 L2.85 -7.57 Z" fill="#1a1a1a" />
+      <path d="M0 -3.2 L0 -5.5" stroke="#1a1a1a" stroke-width="0.6" />
+    </g>
+  </defs>
+
+  <!-- Glow behind everything -->
+  <ellipse cx="32" cy="30" rx="24" ry="28" fill="url(#glow)" filter="url(#blur)" />
+
+  <!-- Flames: outer, middle, core — drawn before the ball so the ball sits in front -->
+  <g filter="url(#fire)">
+    <path fill="url(#flame-outer)"
+      d="M14 44 C10 32 16 24 20 18 C20 24 23 27 25 28 C23 18 27 10 34 2 C34 10 38 14 41 18 C42 14 42 11 41 8 C48 16 52 28 50 44 Z" />
+    <path fill="url(#flame-mid)"
+      d="M18 44 C16 34 20 28 24 24 C24 29 26 31 28 32 C27 24 30 17 34 11 C35 18 38 22 40 26 C41 23 41 21 41 19 C46 26 47 35 46 44 Z" />
+    <path fill="url(#flame-core)"
+      d="M23 44 C22 37 25 33 28 30 C28 34 30 35 31 36 C31 30 33 25 35 21 C37 27 40 31 41 36 C42 39 42 42 41 44 Z" />
+  </g>
+
+  <!-- The football (built at radius 10 around 0,0, then moved and scaled into place) -->
+  <g transform="translate(32 44) scale(1.6)">
+    <circle r="10" fill="url(#ball-shade)" />
+    <g clip-path="url(#ball-clip)">
+      <path d="M0 -3.2 L3.04 -0.99 L1.88 2.59 L-1.88 2.59 L-3.04 -0.99 Z" fill="#1a1a1a" />
+      <use href="#panel" />
+      <use href="#panel" transform="rotate(72)" />
+      <use href="#panel" transform="rotate(144)" />
+      <use href="#panel" transform="rotate(216)" />
+      <use href="#panel" transform="rotate(288)" />
+      <circle r="10" fill="url(#fire-light)" />
+    </g>
+    <circle r="10" fill="none" stroke="#5a5a5a" stroke-width="0.5" />
+  </g>
+</svg>

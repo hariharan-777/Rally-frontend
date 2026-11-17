@@ -1,9 +1,11 @@
+import { BookingsIcon, FlamingBallIcon, GamesIcon, ProfileIcon } from './NavIcons'
+
 // The tabs in the bottom bar. `as const` makes `id` a fixed set of strings instead of any string.
 const TABS = [
-  { id: 'venues', label: 'Venues' },
-  { id: 'games', label: 'Games' },
-  { id: 'bookings', label: 'Bookings' },
-  { id: 'profile', label: 'Profile' },
+  { id: 'venues', label: 'Venues', Icon: FlamingBallIcon },
+  { id: 'games', label: 'Games', Icon: GamesIcon },
+  { id: 'bookings', label: 'Bookings', Icon: BookingsIcon },
+  { id: 'profile', label: 'Profile', Icon: ProfileIcon },
 ] as const
 
 export type TabId = (typeof TABS)[number]['id']
@@ -26,7 +28,8 @@ export function BottomNav({ active, onChange, compact = false }: Props) {
           aria-current={tab.id === active ? 'page' : undefined}
           onClick={() => onChange(tab.id)}
         >
-          {tab.label}
+          <tab.Icon />
+          <span>{tab.label}</span>
         </button>
       ))}
     </nav>
