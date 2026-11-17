@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { Venue } from '../api/venues'
 import { SlideToBook } from './SlideToBook'
 
@@ -12,12 +12,20 @@ type Props = {
 
 export type RouteInfo = { venueId: string; distanceMeters: number; durationSeconds: number }
 
+// Google Maps Embed API key (optional). No key → no Street View button.
+const GOOGLE_EMBED_KEY = import.meta.env.VITE_GOOGLE_MAPS_EMBED_KEY
+
 // A details card that slides into the top-right quarter of the screen when a venue ball is tapped.
 // It's always in the page; the `is-open` class slides it on/off screen (see index.css).
 export function VenuePanel({ venue, open, onClose, onBook, routeInfo }: Props) {
   // Only use the route if it's for the venue on screen (an older venue's route could still be stored).
   const route = venue && routeInfo?.venueId === venue.id ? routeInfo : null
   const panel = useRef<HTMLElement>(null)
+
+  // Which venue's Street View is open (null = closed). Storing the venue id, not just true/false,
+  // means it closes by itself when you tap a different ball.
+  const [streetViewFor, setStreetViewFor] = useState<string | null>(null)
+  const showStreetView = venue !== null && open && streetViewFor === venue.id
 
   useEffect(() => {
     if (!open) return
@@ -80,7 +88,43 @@ export function VenuePanel({ venue, open, onClose, onBook, routeInfo }: Props) {
                   <path d="M7 17 L17 7 M9 7 H17 V15" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
               </a>
+
+              {/* Street View toggle — only when a Google Embed key is set up. */}
+              {GOOGLE_EMBED_KEY && (
+                <>
+                  <span className="venue-panel__dot" aria-hidden="true">·</span>
+                  <button
+                    type="button"
+                    className={`venue-panel__street-btn${showStreetView ? ' is-active' : ''}`}
+                    onClick={() => setStreetViewFor(showStreetView ? null : venue.id)}
+                    aria-expanded={showStreetView}
+                    aria-label={showStreetView ? 'Hide Street View' : 'Show Street View'}
+                    title="Street View"
+                  >
+                    {/* A little person, like Google's Street View "pegman". */}
+                    <svg viewBox="0 0 24 24" width="13" height="13" aria-hidden="true">
+                      <circle cx="12" cy="5" r="3" fill="currentColor" />
+                      <path d="M8 10 H16 L15 16 H13.5 L13 22 H11 L10.5 16 H9 Z" fill="currentColor" />
+                    </svg>
+                    Street
+                  </button>
+                </>
+              )}
             </div>
+
+            {/* Google's own Street View widget (Maps Embed API). Google renders it inside the
+                iframe with its own branding and credits, which is what makes this allowed. */}
+            {showStreetView && GOOGLE_EMBED_KEY && (
+              <iframe
+                className="venue-panel__street"
+                title={`Street View near ${venue.name}`}
+                src={streetViewUrl(venue, GOOGLE_EMBED_KEY)}
+                loading="lazy"
+                allowFullScreen
+                // Sends your site's address to Google, so a key restricted to your domain works.
+                referrerPolicy="no-referrer-when-downgrade"
+              />
+            )}
           </div>
           </div>
         )}
@@ -114,6 +158,14 @@ function GoogleG() {
 function googleMapsUrl(venue: Venue): string {
   const query = encodeURIComponent(`${venue.name}, ${venue.fullAddress}`)
   return `https://www.google.com/maps/search/?api=1&query=${query}`
+}
+
+// Maps Embed API Street View URL. Google finds the nearest Street View photo to the venue's
+// position. fov = field of view (zoom): 90° is a natural, slightly wide view.
+function streetViewUrl(venue: Venue, key: string): string {
+  const [lng, lat] = venue.position
+  const params = new URLSearchParams({ key, location: `${lat},${lng}`, fov: '90' })
+  return `https://www.google.com/maps/embed/v1/streetview?${params}`
 }
 
 // Drive time: 182 → "4 min", 4000 → "1 h 7 min". Rounded up, so we never promise too little.

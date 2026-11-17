@@ -4,6 +4,7 @@ import { BottomNav, type TabId } from './components/BottomNav'
 import { VenuePanel, type RouteInfo } from './components/VenuePanel'
 import { fetchNearbyVenues, type Venue } from './api/venues'
 import { fetchRoute } from './api/directions'
+import { MAP_STYLE, ROUTE_CASING_COLOR } from './lib/theme'
 import { createAvatar3D, type Avatar3D } from './lib/avatar3d'
 
 // Used when we can't get the user's location. [longitude, latitude] — Koramangala, Bengaluru.
@@ -80,7 +81,7 @@ function App() {
     function showMap(center: [number, number], isUserLocation: boolean) {
       olaMaps
         .init({
-          style: 'https://api.olamaps.io/tiles/vector/v1/styles/default-light-standard/style.json',
+          style: MAP_STYLE, // light or dark map, from src/lib/theme.ts
           container,
           center,
           zoom: isUserLocation ? 15 : 13,
@@ -187,7 +188,7 @@ function App() {
                     type: 'line',
                     source: 'route',
                     layout: rounded,
-                    paint: { 'line-color': '#ffffff', 'line-width': 8 },
+                    paint: { 'line-color': ROUTE_CASING_COLOR, 'line-width': 8 },
                   })
                   // The fire: pale yellow at your end, through orange, to deep red at the venue.
                   // ['line-progress'] is that 0 → 1 distance along the line.
@@ -313,7 +314,7 @@ function App() {
               inset: 0,
               display: 'grid',
               placeItems: 'center',
-              background: 'var(--rally-surface)',
+              background: 'var(--rally-surface-flat)', // solid: a full screen shouldn't show the map through
               color: 'var(--rally-green)',
             }}
           >
