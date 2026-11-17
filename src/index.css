@@ -50,14 +50,47 @@
   }
 }
 
-/* Rally theme: light green surfaces everywhere (nav, venue card, slider, screens).
-   Defined once here so the whole app changes together. Fixed colours — same in dark mode. */
+/* Rally theme: green surfaces everywhere (nav, venue card, slider, screens).
+   Defined once here so the whole app changes together. Light values here; dark values below.
+   The phone's own dark mode doesn't affect them — only src/lib/theme.ts does. */
 :root {
   --rally-green: #0b6e4f; /* accents: active tab, knob, links */
-  --rally-surface: linear-gradient(150deg, #f0fdf4 0%, #dcfce7 55%, #bbf7d0 100%);
+  /* Venue card + slider: quite see-through (the last number in rgba is opacity: 0.4 = 40% solid). */
+  --rally-surface: linear-gradient(
+    150deg,
+    rgba(240, 253, 244, 0.4) 0%,
+    rgba(220, 252, 231, 0.4) 55%,
+    rgba(187, 247, 208, 0.4) 100%
+  );
+  /* Bottom nav: more solid than the card (60%). */
+  --rally-nav-surface: linear-gradient(
+    150deg,
+    rgba(240, 253, 244, 0.6) 0%,
+    rgba(220, 252, 231, 0.6) 55%,
+    rgba(187, 247, 208, 0.6) 100%
+  );
+  /* Frosted glass: blurs whatever is behind a bar, so text stays readable over busy map areas. */
+  --rally-blur: blur(14px) saturate(1.5);
   --rally-surface-flat: #e8fbef; /* the same green as one colour, for places a gradient can't go */
   --rally-border: rgba(11, 110, 79, 0.18);
   --rally-shadow: 0 8px 24px rgba(11, 110, 79, 0.22);
+  --rally-text: #3f6b55; /* normal text: muted green-grey */
+  --rally-text-strong: #052e1c; /* headings, drive time, "Book now" */
+  --rally-text-accent: #0b6e4f; /* sport name, Google link */
+}
+
+/* Dark theme: the same variable names with dark values. Turned on by data-theme="dark" on <html>
+   (src/lib/theme.ts). Everything that uses the variables switches automatically. */
+:root[data-theme='dark'] {
+  --rally-green: #34d399; /* brighter green, so accents still pop on black */
+  /* Black, with a faint sheen — and see-through like the light theme. */
+  --rally-surface: linear-gradient(150deg, rgba(28, 28, 28, 0.4) 0%, rgba(10, 10, 10, 0.4) 100%);
+  --rally-nav-surface: linear-gradient(150deg, rgba(28, 28, 28, 0.6) 0%, rgba(10, 10, 10, 0.6) 100%);  --rally-surface-flat: #000;
+  --rally-border: rgba(255, 255, 255, 0.1);
+  --rally-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+  --rally-text: #a3a3a3; /* neutral grey, no green tint */
+  --rally-text-strong: #fafafa;
+  --rally-text-accent: #4ade80;
 }
 
 #root {
@@ -130,7 +163,7 @@ code {
 .bottom-nav {
   /* Always the light-green Rally pill, even in dark mode: override the theme colours just inside
      the bar. Everything below that uses var(--text), var(--border) etc. picks these up. */
-  --text: #3f6b55; /* muted green-grey for the inactive tabs */
+  --text: var(--rally-text); /* muted colour for the inactive tabs */
   --accent: var(--rally-green);
   --border: var(--rally-border);
 
@@ -147,7 +180,9 @@ code {
   width: min(78vw, 400px); /* 78% of the screen width, capped at 400px on desktops */
   display: flex;
   padding: 3px;
-  background: var(--rally-surface);
+  background: var(--rally-nav-surface); /* 60% solid — more solid than the venue card */
+  backdrop-filter: var(--rally-blur);
+  -webkit-backdrop-filter: var(--rally-blur); /* Safari still needs the prefix */
   border: 1px solid var(--border);
   border-radius: 999px; /* larger than half the height → both ends become semicircles */
   box-shadow: var(--rally-shadow);
@@ -206,7 +241,8 @@ code {
   left: 0;
   top: 25%;
   height: 50%; /* a short line centred vertically, not edge to edge */
-  width: 1px;
+  width: 2px;
+  border-radius: 2px; /* rounded ends, so the thicker line looks soft rather than blocky */
   background: var(--border);
   transition: opacity 200ms ease;
 }
@@ -360,7 +396,7 @@ code {
   display: flex;
   flex-direction: column;
   gap: 10px;
-  color: #3f6b55;
+  color: var(--rally-text);
   font-family: 'Outfit', system-ui, sans-serif; /* everything inside uses Outfit */
   /* Hidden: shifted right by its own width plus the gap, so it's completely off-screen. */
   transform: translateX(calc(100% + var(--gap) * 2));
@@ -382,6 +418,8 @@ code {
   min-height: 0; /* can shrink on a short screen, so the slider below stays visible */
   overflow: hidden; /* keep the content inside the rounded corners */
   background: var(--rally-surface);
+  backdrop-filter: var(--rally-blur);
+  -webkit-backdrop-filter: var(--rally-blur);
   border: 1px solid var(--rally-border);
   border-radius: 16px; /* softly rounded rectangle (the slider below stays a pill) */
   box-shadow: var(--rally-shadow);
@@ -419,7 +457,7 @@ code {
 
 /* Sport name in the info line: plain text, just bolder and green so it stands out a little. */
 .venue-panel__sport {
-  color: #0b6e4f;
+  color: var(--rally-text-accent);
   font-weight: 600;
 }
 
@@ -428,7 +466,7 @@ code {
   font-size: 14px;
   font-weight: 600;
   line-height: 1.25;
-  color: #052e1c; /* very dark green instead of black — sits better on the green */
+  color: var(--rally-text-strong);
 }
 
 /* "1.2 km away · Badminton · G ↗" on one line. */
@@ -442,8 +480,45 @@ code {
 
 /* Drive time: bold, it's what people care about most. */
 .venue-panel__eta {
-  color: #052e1c;
+  color: var(--rally-text-strong);
   font-weight: 600;
+}
+
+/* "👤 Street" — a plain text button, styled like the Google link next to it. */
+.venue-panel__street-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 0;
+  border: none;
+  background: none;
+  font: inherit;
+  font-weight: 600;
+  color: var(--rally-text-accent);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.venue-panel__street-btn.is-active {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.venue-panel__street-btn:focus-visible {
+  outline: 2px solid var(--rally-text-accent);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* The Street View iframe: full width of the card, short enough to keep the card in the top half. */
+.venue-panel__street {
+  display: block;
+  width: 100%;
+  height: 150px;
+  margin-top: 10px;
+  border: 0;
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.08); /* placeholder tone while Google loads it */
 }
 
 .venue-panel__dot {
@@ -455,7 +530,7 @@ code {
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  color: #0b6e4f;
+  color: var(--rally-text-accent);
   font-weight: 600;
   text-decoration: underline;
   text-decoration-color: transparent; /* underline appears on hover (below) */
@@ -469,7 +544,7 @@ code {
 }
 
 .venue-panel__maps-link:focus-visible {
-  outline: 2px solid #0b6e4f;
+  outline: 2px solid var(--rally-text-accent);
   outline-offset: 2px;
   border-radius: 4px;
 }
@@ -514,6 +589,8 @@ code {
   border-radius: 999px;
   /* Floats on the map on its own, in the same light green as the card and nav. */
   background: var(--rally-surface);
+  backdrop-filter: var(--rally-blur);
+  -webkit-backdrop-filter: var(--rally-blur);
   border: 1px solid var(--rally-border);
   box-shadow: var(--rally-shadow);
   overflow: hidden; /* clip the fire trail to the rounded track */
@@ -545,7 +622,7 @@ code {
   font-size: 12px;
   font-weight: 500;
   letter-spacing: 0.02em;
-  color: #111; /* black text, no highlight — the knob's nudge is the only hint */
+  color: var(--rally-text-strong); /* black in light theme, near-white in dark — no highlight */
   pointer-events: none; /* let drags pass through to the knob */
   transition: opacity 300ms ease; /* fades back in smoothly if the knob springs back */
 }
