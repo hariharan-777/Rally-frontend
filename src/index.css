@@ -386,7 +386,7 @@ code {
 
   position: fixed;
   top: var(--gap);
-  right: calc(var(--gap) + 24px); /* extra room on the right for the bubble tail */
+  right: var(--gap); /* tucked into the top-right corner */
   z-index: 20; /* above the map */
   /* Right half of the screen: 50% of the width minus the gaps — but never narrower than
      240px (a phone's half is too thin to read) and never wider than 420px on desktops. */
@@ -403,7 +403,7 @@ code {
   color: var(--rally-text);
   font-family: 'Outfit', system-ui, sans-serif; /* everything inside uses Outfit */
   /* Hidden: shifted right by its own width, plus the gap and the tail, so it's completely off-screen. */
-  transform: translateX(calc(100% + var(--gap) * 2 + 52px));
+  transform: translateX(calc(100% + var(--gap) * 2));
   transition: transform 280ms cubic-bezier(0.2, 0.8, 0.2, 1); /* quick start, gentle stop */
 }
 
@@ -418,37 +418,16 @@ code {
 
 /* The green card with the venue details. */
 .venue-panel__card {
-  position: relative; /* so the tail (::after) is placed against the card's own corner */
   display: flex;
   min-height: 0; /* can shrink on a short screen, so the slider below stays visible */
-  /* no overflow: hidden — it would clip the tail sticking out of the corner */
+  overflow: hidden; /* keep the content inside the rounded corners */
   background: var(--rally-surface);
   backdrop-filter: var(--rally-blur);
   -webkit-backdrop-filter: var(--rally-blur);
   border: 1px solid var(--rally-border);
   border-radius: 16px; /* softly rounded rectangle (the slider below stays a pill) */
-  border-top-right-radius: 0; /* sharp corner where the tail joins, like a WhatsApp bubble */
+  border-top-right-radius: 0; /* …except the top-right corner: sharp, pointing into the screen corner */
   box-shadow: var(--rally-shadow);
-}
-
-/* The chat-bubble tail: a small curved point sticking out of the top-right corner.
-   clip-path cuts a plain box into the tail shape — a straight top edge, then a curve back
-   to the card's side (12×13 px). It uses the same colour and blur as the card so they read
-   as one shape. */
-.venue-panel__card::after {
-  content: '';
-  position: absolute;
-  top: -1px; /* line up with the card's top border */
-  right: -25px; /* stick out past the right edge */
-  width: 26px;
-  height: 18px;
-  background: var(--rally-surface);
-  backdrop-filter: var(--rally-blur);
-  -webkit-backdrop-filter: var(--rally-blur);
-  /* A long point sweeping away from the card: flat along the top out to the tip (26px), then a
-     curve that bows inwards (its control points sit above the straight line back), so the tail
-     is thick where it joins the card and tapers to a sharp tip — like a WhatsApp bubble. */
-  clip-path: path('M0 0 L26 0 C17 1 7 5 0 18 Z');
 }
 
 .venue-panel__body {
