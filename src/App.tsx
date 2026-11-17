@@ -221,7 +221,8 @@ function App() {
                     [Math.min(...lngs), Math.min(...lats)],
                     [Math.max(...lngs), Math.max(...lats)],
                   ],
-                  { padding: { top: 190, bottom: 90, left: 40, right: 40 }, maxZoom: 16, duration: 800 },
+                  // bottom 120: clears the nav bar, which now sits above the Ola logo row
+                  { padding: { top: 190, bottom: 120, left: 40, right: 40 }, maxZoom: 16, duration: 800 },
                 )
               })
               .catch((error) => console.error('Could not load route:', error))
